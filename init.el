@@ -27,9 +27,55 @@
      (message "Couldn't install optional package `%s': %S" package err)
      nil)))
 
+;; Setup execpath
+(when (shl/require 'exec-path-from-shell)
+  (when (or (memq window-system '(mac ns x pgtk))
+            (unless (memq system-type '(ms-dos windows-nt))
+              (daemonp)))
+    (exec-path-from-shell-initialize)))
+
 ;; Appearance
-(when (shl/require 'modus-themes)
-  (load-theme 'modus-operandi-deuteranopia :no-confirm))
+;; (when (shl/require 'modus-themes)
+;;   (load-theme 'modus-vivendi-deuteranopia :no-confirm))
+(when (shl/require 'gruber-darker-theme)
+  (load-theme 'gruber-darker :no-confirm))
+
+(when (shl/maybe-require 'fontaine)
+  (add-hook 'emacs-startup-hook #'fontaine-mode)
+  (add-hook 'emacs-startup-hook (lambda ()
+                                  (fontaine-set-preset 'regular-dark)))
+    (setopt x-underline-at-descent-line nil)
+    (setq fontaine-presets
+        '((small
+           :default-family "Iosevka Comfy Motion"
+           :default-height 80
+           :variable-pitch-family "Iosevka Comfy Duo")
+          (regular-dark
+           :default-family "Iosevka Comfy"
+           :variable-pitch-family "Iosevka Comfy Duo"
+           :default-weight medium) ; like this it uses all the fallback values and is named `regular'
+          (regular-light 
+           :default-weight semilight) ; like this it uses all the fallback values and is named `regular'
+          (medium-light
+           :default-weight semilight
+           :default-height 115)
+          (medium-dark
+           :default-weight medium
+           :default-height 115
+           :bold-weight extrabold)
+          (large
+           :inherit medium
+           :default-height 150))))
+
+(add-hook 'org-mode-hook #'display-line-numbers-mode)
+(add-hook 'prog-mode-hook #'display-line-numbers-mode)
+
+(setopt display-line-numbers-width 3
+        display-line-numbers-type 'relative)
+(when (boundp 'display-fill-column-indicator)
+  (setq-default indicate-buffer-boundaries 'left
+                display-fill-column-indicator-character ?┊)
+  (add-hook 'prog-mode-hook #'display-fill-column-indicator-mode))
 
 ;; Settings
 (setopt custom-file (concat user-emacs-directory "custom.el")
@@ -121,9 +167,15 @@
 ;; Subword-mode enables moving in CamelCase and snake_case
 (global-subword-mode)
 
+;; Delete selection
+(add-hook 'after-init-hook #'delete-selection-mode)
+
 ;; Expand Region makes for a nicer way to mark stuff
 (when (shl/maybe-require 'expand-region)
   (global-set-key (kbd "M-h") #'er/expand-region))
+
+;; Hippie Expand instead of dabbrev
+(global-set-key [remap dabbre-expand] 'hippie-expand)
 
 ;; Compilation
 (defun shl/colorize-compilation-buffer ()
@@ -150,5 +202,21 @@
 
 
   (global-set-key (kbd "C-c n") 'obsidian-hydra/body))
+
+(setq treesit-language-source-alist
+      '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+        (python "https://github.com/tree-sitter/tree-sitter-python")
+        (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+        (toml "https://github.com/tree-sitter/tree-sitter-toml")
+        (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+
+(mapc #'treesit-install-language-grammar
+      (mapcar #'car treesit-language-source-alist))q
+
+(setq major-mode-ramap-alist
+      '((yaml-mode . yaml-ts-mode)
+        (bash-mode . bash-ts-mode)
+        (python-mode . python-ts-mode)))
+
 
 ;;; init.el ends here

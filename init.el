@@ -37,8 +37,10 @@
 ;; Appearance
 ;; (when (shl/require 'modus-themes)
 ;;   (load-theme 'modus-vivendi-deuteranopia :no-confirm))
-(when (shl/require 'gruber-darker-theme)
-  (load-theme 'gruber-darker :no-confirm))
+;; (when (shl/require 'gruber-darker-theme)
+;;   (load-theme 'gruber-darker :no-confirm))
+(when (shl/require 'zenburn-theme)
+  (load-theme 'zenburn :no-confirm))
 
 (when (shl/maybe-require 'fontaine)
   (add-hook 'emacs-startup-hook #'fontaine-mode)

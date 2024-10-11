@@ -35,8 +35,22 @@
     (exec-path-from-shell-initialize)))
 
 ;; Appearance
-(when (shl/require 'gruber-darker-theme)
-  (load-theme 'gruber-darker :no-confirm))
+(setopt custom-safe-themes t)
+(when (shl/require 'ef-themes)
+  (setopt ef-themes-mixed-fonts t
+	  ef-themes-variable-pitch-ui t)
+  (mapc #'disable-theme custom-enabled-themes)
+
+  (defun my-ef-themes-mode-line ()
+    "Tweak the style of the mode lines."
+    (ef-themes-with-colors
+     (custom-set-faces
+      `(mode-line ((,c :background ,bg-active :foreground ,fg-main :box (:line-width 1 :color ,fg-dim))))
+      `(mode-line-inactive ((,c :box (:line-width 1 :color ,bg-active)))))))
+
+  (add-hook 'ef-themes-post-load-hook #'my-ef-themes-mode-line)
+
+  (ef-themes-select 'ef-deuteranopia-light))
 
 
 (when (shl/maybe-require 'fontaine)
